@@ -80,7 +80,11 @@ namespace SpatialSys.UnitySDK.Editor
             if (!performNetworkRequest)
                 return Promise<bool>.Resolved(PackageManagerUtility.updateAvailable);
 
-            return PackageManagerUtility.CheckForUpdate();
+            // EDIT
+            //return PackageManagerUtility.CheckForUpdate();
+            ///////////////////////////////////////////////////////////////////////////
+            return Promise<bool>.Resolved(false);       // New version will be ignored
+            ///////////////////////////////////////////////////////////////////////////
 #endif
         }
 
@@ -139,4 +143,5 @@ namespace SpatialSys.UnitySDK.Editor
 #endif
         }
     }
+
 }
