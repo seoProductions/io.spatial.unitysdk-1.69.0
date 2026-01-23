@@ -1,9 +1,4 @@
-# Spatial Unity SDK
+# SDK CHANGES:
 
-This package allows creators to create content in Unity and publish it to Spatial
-
-## License
-
-MIT License
-
-Copyright © 2024 Spatial Systems Inc
+- `SpatialSys.UnitySDK.Editor.UpgradeUtility.CheckForUpgrade` Due to the nature of the local spatialSDK, I removed support for automatic SDK upgrades.
+- `SpatialSys.UnitySDK.Editor.SpatialFeatureFlags` Set member variable to a permanent enabled. A nessesary evil 🫢
