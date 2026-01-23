@@ -334,13 +334,18 @@ namespace SpatialSys.UnitySDK.Editor
                     return (IPromise)uploadPromise;
                 })
                 .Then(() => {
-                    UnityEditor.EditorUtility.DisplayDialog(
+
+                    // EDITOR
+                    //UnityEditor.EditorUtility.DisplayDialog(
+                    ////////////////////////////////////////////////////////////////////////
+                    Console.WriteLine(
                         "Upload complete!",
                         "Your package was successfully uploaded and we've started processing it.\n\n" +
                         "This may take as little as 15 minutes to process, depending on our backlog and your package complexity. If any unexpected errors occur, we aim to address the issue within 24 hours.\n\n" +
                         "You will receive an email notification once the package has been published.",
                         "OK"
                     );
+                    ////////////////////////////////////////////////////////////////////////
                 })
                 .Catch(exc => {
                     if (exc is RSG.PromiseCancelledException)
