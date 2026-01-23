@@ -16,7 +16,11 @@ namespace SpatialSys.UnitySDK.Editor
 #if SPATIAL_UNITYSDK_INTERNAL
         public static bool enabled => false; // don't change -- force disabled
 #else
-        public static bool enabled => !Application.isBatchMode;
+        // EDIT
+        //public static bool enabled => !Application.isBatchMode;
+        ///////////////////////////////////////////////////////////////////////////
+        public static bool enabled = true;  // unfortunate nessesary evil
+        ///////////////////////////////////////////////////////////////////////////
 #endif
 
         public static bool initialized => !string.IsNullOrEmpty(SessionState.GetString(SESSION_FEATURE_FLAGS_KEY, defaultValue: null));
