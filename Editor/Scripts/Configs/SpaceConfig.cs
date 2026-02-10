@@ -11,6 +11,7 @@ namespace SpatialSys.UnitySDK.Editor
         private const int LATEST_VERSION = 1;
         public const int PLATFORM_MAX_CAPACITY = 50;
 
+        [HideInInspector] public string teamID;
         [HideInInspector] public string worldID;
 
         // "Space Name" would be derived from PackageConfig.packageName

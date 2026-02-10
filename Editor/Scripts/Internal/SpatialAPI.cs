@@ -322,6 +322,38 @@ namespace SpatialSys.UnitySDK.Editor
             public string displayName;
         }
 
+        public static IPromise<Team[]> GetTeams()
+        {
+            RequestHelper request = CreateRequest();
+            request.Uri = $"{API_ORIGIN}/v2/teams";
+
+            IPromise<ResponseHelper> resp = RestClient.Get(request);
+            resp.Catch(HandleRequestException);
+
+            return resp.Then(response => {
+                string json = response.Text;
+                // Wrap the array in a temporary object for JsonUtility
+                string wrappedJson = "{\"teams\":" + json + "}";
+                GetTeamsResponse wrapper = JsonUtility.FromJson<GetTeamsResponse>(wrappedJson);
+                return wrapper.teams;
+            });
+        }
+
+        [Serializable]
+        private struct GetTeamsResponse
+        {
+            public Team[] teams;
+        }
+
+        [Serializable]
+        public struct Team
+        {
+            public string id;
+            public bool isPrivateTeam;
+
+            public string name;
+        }
+
         //--------------------------------------------------------------------------------------------------------------
         // BADGES
         //--------------------------------------------------------------------------------------------------------------
@@ -364,9 +396,33 @@ namespace SpatialSys.UnitySDK.Editor
 
 #if SPATIAL_UNITYSDK_STAGING
             request.EnableDebug = true;
+            Debug.Log($"SpatialAPI Request: {ToCurl(request)}");
 #endif
 
             return request;
+        }
+
+        private static string ToCurl(RequestHelper request)
+        {
+            string curl = $"curl -X {request.Method} '{request.Uri}'";
+
+            foreach (KeyValuePair<string, string> header in request.Headers)
+            {
+                curl += $" -H '{header.Key}: {header.Value}'";
+            }
+
+            if (request.Body != null)
+            {
+                string bodyJson = JsonUtility.ToJson(request.Body);
+                curl += $" -d '{bodyJson}'";
+            }
+            else if (request.BodyRaw != null && request.BodyRaw.Length > 0)
+            {
+                string bodyString = System.Text.Encoding.UTF8.GetString(request.BodyRaw);
+                curl += $" -d '{bodyString}'";
+            }
+
+            return curl;
         }
 
         private static RequestHelper CreateUploadFileRequest(bool useSpatialHeaders, string url, byte[] data)
@@ -381,8 +437,13 @@ namespace SpatialSys.UnitySDK.Editor
 
         private static void HandleRequestException(Exception exc)
         {
-            if (exc is RequestException requestException && requestException.StatusCode == 401)
-                AuthUtility.SetAuthStatus(AuthStatus.NotAuthenticated);
+            if (exc is RequestException requestException)
+            {
+                if (requestException.StatusCode == 401)
+                    AuthUtility.SetAuthStatus(AuthStatus.NotAuthenticated);
+
+                Debug.LogError($"SpatialAPI Request Exception: {requestException.StatusCode} - {requestException.Message}\n Curl: {ToCurl(requestException.Request)}");
+            }
         }
 
         private static string PackageSourceToSAPIPackageSource(PackageSource source)

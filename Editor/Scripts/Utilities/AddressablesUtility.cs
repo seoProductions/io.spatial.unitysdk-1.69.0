@@ -33,6 +33,7 @@ namespace SpatialSys.UnitySDK.Editor
         /// </summary>
         public static bool isActiveInProject => Directory.Exists(DATA_FOLDER_PATH) &&
             AddressableAssetSettingsDefaultObject.SettingsExists &&
+            AddressableAssetSettingsDefaultObject.Settings != null &&
             Directory.Exists(AddressableAssetSettingsDefaultObject.Settings.GroupFolder);
 
         static AddressablesUtility()
@@ -369,7 +370,6 @@ namespace SpatialSys.UnitySDK.Editor
 
         private static void SetEditorPlayModeDataBuilder()
         {
-            Debug.Log($"XXX AddressableAssetSettingsDefaultObject.Settings: {AddressableAssetSettingsDefaultObject.Settings}");
             if (!isActiveInProject)
                 return;
 

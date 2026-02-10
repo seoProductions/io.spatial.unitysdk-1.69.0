@@ -80,6 +80,10 @@
                         <ui:VisualElement name="Filler" style="flex-grow: 1; height: 0;" />
                         <ui:Button text="Open Spatial Studio" display-tooltip-when-elided="true" name="openStudio" class="blockButton blockButton_small" />
                     </ui:VisualElement>
+                    <ui:VisualElement name="teamSelector" style="flex-direction: row; min-height: auto; min-width: auto; margin-top: 0; margin-bottom: 3px;">
+                        <ui:DropdownField label="Default Team" index="-1" choices="System.Collections.Generic.List`1[System.String]" name="defaultTeamDropDown" style="margin-left: 0; margin-right: 5px; margin-top: 0; margin-bottom: 0;" />
+                        <ui:Button text="Refresh" display-tooltip-when-elided="true" name="refreshTeamsButton" enable-rich-text="false" tooltip="Fetch all the teams for your account" style="height: 22px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; width: auto; min-width: 60px;" />
+                    </ui:VisualElement>
                     <ui:VisualElement name="worldSelector" style="flex-direction: row; min-height: auto; min-width: auto; margin-top: 0; margin-bottom: 3px;">
                         <ui:DropdownField label="Default World" index="-1" choices="System.Collections.Generic.List`1[System.String]" name="defaultWorldDropDown" style="margin-left: 0; margin-right: 5px; margin-top: 0; margin-bottom: 0;" />
                         <ui:Button text="Refresh" display-tooltip-when-elided="true" name="refreshWorldsButton" enable-rich-text="false" tooltip="Fetch all the worlds for your account" style="height: 22px; margin-left: 0; margin-right: 5px; margin-top: 0; margin-bottom: 0; width: auto; min-width: 60px;" />

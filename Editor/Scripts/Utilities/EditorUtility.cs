@@ -15,7 +15,7 @@ namespace SpatialSys.UnitySDK.Editor
 
         public static readonly (Version, Version)[] SUPPORTED_UNITY_VERSION_RANGES = {
             (new Version(2021, 3, 8), new Version(2021, 3, 21)),
-            (new Version(2021, 3, 44), new Version(2021, 3, 44)) // There may have been some crash introduced in between 2021.3.21 and 2021.3.44, so we don't want to risk breaking changes.
+            (new Version(2021, 3, 44), new Version(2021, 3, 45)) // There may have been some crash introduced in between 2021.3.21 and 2021.3.44, so we don't want to risk breaking changes.
         };
 
         public static bool isUsingSupportedUnityVersion
