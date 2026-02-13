@@ -721,7 +721,7 @@ namespace SpatialSys.UnitySDK.Editor
         *  Quick Modification of PasteAuthToken() function 
         */
 
-        public void PasteAuthTokenCLI()
+        public static void PasteAuthTokenCLI()
         {
             string clipboard = GUIUtility.systemCopyBuffer;
 
