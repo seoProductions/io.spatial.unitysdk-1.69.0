@@ -643,7 +643,7 @@ namespace SpatialSys.UnitySDK.Editor
 
             if (string.IsNullOrWhiteSpace(clipboard))
             {
-                UnityEditor.EditorUtility.DisplayDialog("System clipboard is empty", "Unable to paste the access token since the system clipboard is empty. Try copying the access token to your clipboard again.", "OK");
+                Debug.Log("\n\nCICD ISSUE: CLIPBOARD IS EMPTY \n \n");
                 return;
             }
 
