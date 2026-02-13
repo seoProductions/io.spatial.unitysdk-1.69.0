@@ -276,13 +276,26 @@ namespace SpatialSys.UnitySDK.Editor
                     IPromise createWorldPromise = Promise.Resolved();
                     if (ProjectConfig.activePackageConfig.packageType == PackageType.Space)
                     {
-                        createWorldPromise = WorldUtility.AssignDefaultWorldToProjectIfNecessary()
-                            .Then(() => {
-                                // Make sure that the space package has a worldID assigned
-                                SpaceConfig spaceConfig = ProjectConfig.activePackageConfig as SpaceConfig;
-                                spaceConfig.worldID = ProjectConfig.defaultWorldID;
-                                EditorUtility.SaveAssetImmediately(spaceConfig);
-                            });
+                        SpaceConfig spaceConfig = ProjectConfig.activePackageConfig as SpaceConfig;
+
+                        // If this is a team (not personal/private team), then publish to a world id equal to the team id. This is
+                        // because team-based spaces should be shared among all team members, and the easiest way to do that is to
+                        // have a world that is shared among all team members.
+                        if (!TeamUtility.isDefaultTeamPrivate)
+                        {
+                            spaceConfig.teamID = ProjectConfig.defaultTeamID;
+                            spaceConfig.worldID = ProjectConfig.defaultTeamID;
+                        }
+                        else
+                        {
+                            createWorldPromise = WorldUtility.AssignDefaultWorldToProjectIfNecessary()
+                                .Then(() =>
+                                {
+                                    // Make sure that the space package has a worldID assigned
+                                    spaceConfig.worldID = ProjectConfig.defaultWorldID;
+                                    EditorUtility.SaveAssetImmediately(spaceConfig);
+                                });
+                        }
                     }
 
                     return createWorldPromise;

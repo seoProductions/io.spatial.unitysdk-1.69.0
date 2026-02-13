@@ -39,6 +39,7 @@ namespace SpatialSys.UnitySDK.Editor
 
         // Config Tab Elements
         private DropdownField _configActivePackageDropdown;
+        private DropdownField _configDefaultTeamSelectionDropdown;
         private DropdownField _configDefaultWorldSelectionDropdown;
         private EnumField _configCreatePackageTypeDropdown;
         private TextField _packageConfigName;
@@ -46,6 +47,9 @@ namespace SpatialSys.UnitySDK.Editor
         private VisualElement _packageConfigSKUElement;
         private Label _configPackageType;
         private Button _publishPackageButton;
+        private VisualElement _configWorldsElement;
+        private VisualElement _configTeamsElement;
+        private bool _ignoreTeamIndexChange;
 
         // Utility tab elements
         private Button _initAddressablesButton;
@@ -288,8 +292,17 @@ namespace SpatialSys.UnitySDK.Editor
 
             _configActivePackageDropdown = root.Q<DropdownField>("packageConfigDropDown");
             _configActivePackageDropdown.RegisterValueChangedCallback(OnActivePackageDropdownValueChanged);
+            _configDefaultTeamSelectionDropdown = root.Q<DropdownField>("defaultTeamDropDown");
+            _configDefaultTeamSelectionDropdown.RegisterValueChangedCallback(OnDefaultTeamSelectionDropdownValueChanged);
+            _configWorldsElement = root.Q("worldSelector");
+            _configTeamsElement = root.Q("teamSelector");
             _configDefaultWorldSelectionDropdown = root.Q<DropdownField>("defaultWorldDropDown");
             _configDefaultWorldSelectionDropdown.RegisterValueChangedCallback(OnDefaultWorldSelectionDropdownValueChanged);
+            root.Q<Button>("refreshTeamsButton").clicked += () => {
+                Debug.Log("Refreshing teams");
+                UpdateDefaultTeamSelectionDropdown();
+                TeamUtility.FetchTeams().Then(() => UpdateDefaultTeamSelectionDropdown());
+            };
             root.Q<Button>("refreshWorldsButton").clicked += () => {
                 UpdateDefaultWorldSelectionDropdown();
                 WorldUtility.FetchWorlds().Then(() => UpdateDefaultWorldSelectionDropdown());
@@ -454,7 +467,12 @@ namespace SpatialSys.UnitySDK.Editor
 
         private void UpdateConfigTabContents()
         {
+            // Don't update if GUI hasn't been created yet
+            if (rootVisualElement == null || rootVisualElement.childCount == 0)
+                return;
+
             UpdateActivePackageDropdown(_configActivePackageDropdown);
+            UpdateDefaultTeamSelectionDropdown();
             UpdateDefaultWorldSelectionDropdown();
 
             PackageConfig packageConfig = ProjectConfig.activePackageConfig;
@@ -465,6 +483,8 @@ namespace SpatialSys.UnitySDK.Editor
             string publishingDisabledReason = BuildUtility.GetBuildDisabledReason();
             _publishPackageButton.SetEnabled(string.IsNullOrEmpty(publishingDisabledReason));
             _publishPackageButton.tooltip = _publishPackageButton.enabledSelf ? "Uploads this package to Spatial servers for publishing" : publishingDisabledReason;
+
+            _configTeamsElement.SetEnabled(AuthUtility.isAuthenticated);
 
             // Active Package
             if (packageConfig != null)
@@ -616,6 +636,70 @@ namespace SpatialSys.UnitySDK.Editor
                 ProjectConfig.defaultWorldID = WorldUtility.worlds[index].id;
         }
 
+        private void UpdateDefaultTeamSelectionDropdown()
+        {
+            if (_configDefaultTeamSelectionDropdown == null)
+                return;
+
+            if (_configDefaultTeamSelectionDropdown.choices == null)
+                _configDefaultTeamSelectionDropdown.choices = new List<string>();
+
+            if (TeamUtility.teams == null)
+                return;
+
+            _configDefaultTeamSelectionDropdown.SetEnabled(AuthUtility.isAuthenticated && !TeamUtility.isFetchingTeams);
+            _configDefaultTeamSelectionDropdown.choices.Clear();
+            foreach (string entry in TeamUtility.teams.Select(t => $"{t.name} ({t.id})"))
+                _configDefaultTeamSelectionDropdown.choices.Add(entry);
+
+            int index = System.Array.FindIndex(TeamUtility.teams, t => t.id == ProjectConfig.defaultTeamID);
+            if (index >= 0)
+            {
+                _configDefaultTeamSelectionDropdown.index = index;
+            }
+            else
+            {
+                if (!AuthUtility.isAuthenticated)
+                {
+                    _configDefaultTeamSelectionDropdown.choices.Add("(Not Logged In)");
+                }
+                else if (string.IsNullOrEmpty(ProjectConfig.defaultTeamID))
+                {
+                    _configDefaultTeamSelectionDropdown.choices.Add("None (No Team Selected)");
+                }
+                else
+                {
+                    _configDefaultTeamSelectionDropdown.choices.Add($"Invalid Team ({ProjectConfig.defaultTeamID})");
+                }
+
+                _ignoreTeamIndexChange = true;
+                _configDefaultTeamSelectionDropdown.index = _configDefaultTeamSelectionDropdown.choices.Count - 1;
+                _ignoreTeamIndexChange = false;
+            }
+            UpdateDefaultWorldEnabled();
+        }
+
+        private void OnDefaultTeamSelectionDropdownValueChanged(ChangeEvent<string> evt)
+        {
+            if (_configDefaultTeamSelectionDropdown == null || TeamUtility.teams == null || _ignoreTeamIndexChange)
+                return;
+
+            var dropdownField = evt.target as DropdownField;
+            int index = dropdownField.choices.IndexOf(evt.newValue);
+            if (index >= 0 && index < TeamUtility.teams.Length)
+                ProjectConfig.defaultTeamID = TeamUtility.teams[index].id;
+            if (index == TeamUtility.teams.Length)
+                ProjectConfig.defaultTeamID = null;
+
+            // Only enable world selection if the selected team is a private team
+            UpdateDefaultWorldEnabled();
+        }
+
+        public void UpdateDefaultWorldEnabled()
+        {
+            _configWorldsElement.SetEnabled(AuthUtility.isAuthenticated && !TeamUtility.isFetchingTeams && TeamUtility.isDefaultTeamPrivate);
+        }
+
         private void PasteAuthToken()
         {
             string clipboard = GUIUtility.systemCopyBuffer;
@@ -659,7 +743,8 @@ namespace SpatialSys.UnitySDK.Editor
         {
             VisualElement loggedInBlock = rootVisualElement.Q("loggedInBlock");
 
-            rootVisualElement.Query("notLoggedInBlock").ForEach(block => {
+            rootVisualElement.Query("notLoggedInBlock").ForEach(block =>
+            {
                 block.style.display = !AuthUtility.isAuthenticated && !AuthUtility.isAuthenticating ? DisplayStyle.Flex : DisplayStyle.None;
             });
             rootVisualElement.Q("loggingInBlock").style.display = AuthUtility.isAuthenticating ? DisplayStyle.Flex : DisplayStyle.None;
@@ -669,14 +754,18 @@ namespace SpatialSys.UnitySDK.Editor
                 loggedInBlock.style.display = DisplayStyle.Flex;
                 loggedInBlock.Q<TextElement>("loggedInAsText").text = $"as {AuthUtility.userAlias}";
 
+                TeamUtility.FetchTeams().Then(() => UpdateDefaultTeamSelectionDropdown());
                 WorldUtility.FetchWorlds().Then(() => UpdateDefaultWorldSelectionDropdown());
             }
             else
             {
                 loggedInBlock.style.display = DisplayStyle.None;
 
+                TeamUtility.ClearTeams();
                 WorldUtility.ClearWorlds();
+                UpdateDefaultTeamSelectionDropdown();
                 UpdateDefaultWorldSelectionDropdown();
+                UpdateDefaultWorldEnabled();
             }
         }
 
@@ -697,7 +786,8 @@ namespace SpatialSys.UnitySDK.Editor
         private void RefreshIssues()
         {
             SpatialValidator.RunTestsOnPackage(ValidationRunContext.ManualRun)
-                .Then(validationSummary => {
+                .Then(validationSummary =>
+                {
                     _issuesValidationSummary = validationSummary;
                     UpdateIssuesTabContents();
                 });

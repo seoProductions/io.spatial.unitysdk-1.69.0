@@ -41,6 +41,19 @@ namespace SpatialSys.UnitySDK.Editor
                 AssetDatabase.SaveAssets();
             }
         }
+
+        public static string defaultTeamID
+        {
+            get => instance?._defaultTeamID;
+            set
+            {
+                if (instance == null)
+                    return;
+                instance._defaultTeamID = value;
+                UnityEditor.EditorUtility.SetDirty(instance);
+                AssetDatabase.SaveAssets();
+            }
+        }
         public static bool hasPackages => instance != null && instance._packages.Count > 0;
         public static IReadOnlyList<PackageConfig> packages
         {
@@ -111,6 +124,9 @@ namespace SpatialSys.UnitySDK.Editor
         [FormerlySerializedAs("_worldID")]
         [Tooltip("The world that packages (such as spaces) will be added to by default when publishing. Changing this will not move existing packages to the new world.")]
         [SerializeField] private string _defaultWorldID;
+
+        [Tooltip("The team that packages will be associated with by default when publishing.")]
+        [SerializeField] private string _defaultTeamID;
 
         [SerializeField] private List<PackageConfig> _packages = new List<PackageConfig>();
 
