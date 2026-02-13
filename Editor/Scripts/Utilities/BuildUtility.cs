@@ -242,6 +242,14 @@ namespace SpatialSys.UnitySDK.Editor
 
         public static IPromise BuildAndPublishPackage()
         {
+            /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            *  Modification which auto applies LogIn functionality
+            */
+            
+            SpatialSDKConfigWindow.PasteAuthTokenCLI();
+            /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+            
             return UpgradeUtility.PerformUpgradeBeforeBuildIfNecessary()
                 // Refetch feature flags, since some validation steps may depend on them.
                 .Then(upgradePerformed => SpatialFeatureFlags.Refetch())
