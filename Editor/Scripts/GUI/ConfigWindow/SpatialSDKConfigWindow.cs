@@ -632,6 +632,29 @@ namespace SpatialSys.UnitySDK.Editor
                 GUIUtility.systemCopyBuffer = null;
         }
 
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+        *
+        *  Quick Modification of PasteAuthToken() function 
+        */
+
+        private void PasteAuthTokenCLI()
+        {
+            string clipboard = GUIUtility.systemCopyBuffer;
+
+            if (string.IsNullOrWhiteSpace(clipboard))
+            {
+                UnityEditor.EditorUtility.DisplayDialog("System clipboard is empty", "Unable to paste the access token since the system clipboard is empty. Try copying the access token to your clipboard again.", "OK");
+                return;
+            }
+
+            AuthUtility.LogIn(clipboard);    // no dialouge pop-up needed
+
+            if (GUIUtility.systemCopyBuffer == clipboard)
+                GUIUtility.systemCopyBuffer = null;
+        }
+        
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
         private void HandleAuthStatusChanged()
         {
             VisualElement loggedInBlock = rootVisualElement.Q("loggedInBlock");
