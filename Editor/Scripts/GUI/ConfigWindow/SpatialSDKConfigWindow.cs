@@ -724,6 +724,7 @@ namespace SpatialSys.UnitySDK.Editor
         public static void PasteAuthTokenCLI()
         {
             string clipboard = GUIUtility.systemCopyBuffer;
+            Debug.Log("\n\nCICD: ATTEMPTING TO AUTH VIA CLIPBOARD (Contents):" + clipboard);
 
             if (string.IsNullOrWhiteSpace(clipboard))
             {
