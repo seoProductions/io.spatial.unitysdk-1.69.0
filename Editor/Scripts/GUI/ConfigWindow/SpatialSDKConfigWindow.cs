@@ -719,23 +719,34 @@ namespace SpatialSys.UnitySDK.Editor
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
         *
         *  Quick Modification of PasteAuthToken() function 
+        *  which utilizes the CLI flag -SpatialToken *****  rather than the clipboard
+        *  docker image containers run without X-server, rendering clipboard functionality non-existent.
         */
 
         public static void PasteAuthTokenCLI()
         {
-            string clipboard = GUIUtility.systemCopyBuffer;
-            Debug.Log("\n\nCICD: ATTEMPTING TO AUTH VIA CLIPBOARD (Contents):" + clipboard);
+            Debug.Log("\n\nCICD: ATTEMPTING TO AUTH VIA CLI ARGUMENT");
+        
+            string clipboard = "";
+            string[] cli_args = Environment.GetCommandLineArgs();  // fetch comand line arguments
+            for (int i = 0; i < cli_args; i++)
+            {
+                if (cli_args[i] == "-SpatialToken" &&   // find the dedicated flag
+                i + 1 < cli_args.Length)                // ensure that token exists
+                {
+                    clipboard = cli_args[i + 1];    // store the TOKEN
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(clipboard))
             {
-                Debug.Log("\n\nCICD ISSUE: CLIPBOARD IS EMPTY \n \n");
+                Debug.Log("\n\nCICD ISSUE: CLIPBOARD IS EMPTY \nPLEASE PASS IN THE SECRET SPATIAL TOKEN\n\n");
                 return;
             }
 
             AuthUtility.LogIn(clipboard);    // no dialouge pop-up needed
 
-            if (GUIUtility.systemCopyBuffer == clipboard)
-                GUIUtility.systemCopyBuffer = null;
+            clipboard = "";
         }
         
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
