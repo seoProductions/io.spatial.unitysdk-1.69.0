@@ -5,4 +5,4 @@
 - `SpatialSys.UnitySDK.Editor.SpatialSDKConfigWindow` Cloned and modified the Token Login function to enable CLI support
 
 # WHY ?
-- to run via comand line
+- to run via comand line invoking `SpatialSys.UnitySDK.Editor.BuildUtility.BuildAndPublishPackage`
