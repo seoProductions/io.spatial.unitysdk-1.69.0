@@ -729,7 +729,7 @@ namespace SpatialSys.UnitySDK.Editor
         
             string clipboard = "";
             string[] cli_args = Environment.GetCommandLineArgs();  // fetch comand line arguments
-            for (int i = 0; i < cli_args; i++)
+            for (int i = 0; i < cli_args.Length; i++)
             {
                 if (cli_args[i] == "-SpatialToken" &&   // find the dedicated flag
                 i + 1 < cli_args.Length)                // ensure that token exists
